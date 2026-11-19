@@ -31,7 +31,6 @@
 - [常见问题](#常见问题)
 - [已知限制](#已知限制)
 - [开发约定](#开发约定)
-- [路线图](#路线图)
 - [许可与免责](#许可与免责)
 
 ---
@@ -244,7 +243,7 @@ QYLive/
 | 编码器 | 结果 |
 | --- | --- |
 | **NVIDIA NVENC 直连**（`nvEncodeAPI64.dll`） | **可用**：会话正常打开，1080p60 合成帧 250+ fps，序列头正常；界面勾选“NVIDIA 硬件编码（NVENC）”即启用 |
-| NVIDIA H.264 Encoder MF | 激活阶段失败 `0x8000FFFF`；设了 GPU 偏好后可激活，但收到 D3D11 设备管理器时崩溃 （懒得做了反正没人用）|
+| NVIDIA H.264 Encoder MF | 激活阶段失败 `0x8000FFFF`；设了 GPU 偏好后可激活，但收到 D3D11 设备管理器时崩溃（懒得做了反正没人用）|
 | Intel Quick Sync (MF) | 可激活，但收到 D3D11 设备管理器时**崩溃**（懒得做了反正没人用） |
 | Microsoft AVC DX12 Encode | 只接受 D3D12 纹理，当前未接入（懒得做了反正没人用） |
 | H264 Encoder MF（软件） | 正常，兜底方案 |
@@ -305,7 +304,6 @@ A：程序只是标准 RTMP 客户端，不读取、不修改、不自动化平�
 - 提交前请跑 `cargo check`、`npm run build` 与 `cargo run -p lite-core --example selftest`。
 
 更多细节见 [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)、[`docs/COMPLIANCE.md`](./docs/COMPLIANCE.md)、[`docs/TESTING.md`](./docs/TESTING.md)。
-
 
 ---
 
