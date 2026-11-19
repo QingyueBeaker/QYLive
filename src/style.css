@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  margin: 0;
+  background: #0d0f13;
+  color: #e5e7eb;
+  font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 关闭所有动画，符合“极简 / 低占用”定位 */
+* {
+  transition: none !important;
+  animation: none !important;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #2b303a;
+  border-radius: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #12151a;
+}
+
+input[type="range"] {
+  accent-color: #22d3ee;
+}

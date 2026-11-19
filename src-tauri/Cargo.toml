@@ -1,0 +1,28 @@
+[package]
+name = "lite-rtmp-streamer"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Lite RTMP Streamer - 极简低耗直播推流工具"
+
+[lib]
+name = "lite_rtmp_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+log = "0.4"
+tokio = { version = "1", features = ["rt-multi-thread", "sync", "time"] }
+lite-core = { path = "../crates/lite-core" }
+windows = { version = "0.58", features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_Graphics_Dwm",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_System_Threading",
+] }

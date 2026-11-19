@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lite RTMP Streamer</title>
+  </head>
+  <body>
+    <div class="mx-auto max-w-[1120px] p-5">
+      <!-- 顶部：标题 + 开播控制 -->
+      <div class="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <h1 class="text-[18px] font-semibold tracking-wide text-slate-100">Lite RTMP Streamer</h1>
+          <p class="mt-1 text-[12px] text-slate-500">
+            极简低耗推流 · 纯本地 · 开源非营利 · 与任何直播平台无关联
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 rounded border border-slate-800 bg-[#12151b] px-3 py-1.5">
+            <span id="statusDot" class="h-2 w-2 rounded-full bg-slate-600"></span>
+            <span id="statusText" class="text-[12px] text-slate-400">未开播</span>
+          </div>
+          <span id="statHint" class="max-w-[420px] truncate text-[12px] text-rose-400"></span>
+          <button
+            id="btnStart"
+            class="rounded bg-cyan-600 px-5 py-2 text-[13px] font-medium text-white hover:bg-cyan-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+          >
+            开始推流
+          </button>
+          <button
+            id="btnStop"
+            class="rounded border border-slate-700 px-5 py-2 text-[13px] text-slate-300 hover:border-slate-500 disabled:cursor-not-allowed disabled:text-slate-600"
+            disabled
+          >
+            停止
+          </button>
+        </div>
+      </div>
+
+      <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <!-- 推流地址 -->
+        <section class="rounded border border-slate-800 bg-[#12151b] p-4">
+          <div class="mb-3 flex items-center justify-between">
+            <h2 class="text-[13px] font-medium text-slate-200">推流地址与密钥</h2>
+            <button
+              id="btnPanel"
+              class="rounded border border-slate-700 px-2.5 py-1 text-[12px] text-slate-300 hover:border-slate-500"
+            >
+              打开主播后台
+            </button>
+            <button
+              id="btnOpenBrowser"
+              class="ml-2 rounded border border-slate-700 px-2.5 py-1 text-[12px] text-slate-400 hover:border-slate-500"
+              title="打开直播间页面（观看端）"
+            >
+              用浏览器打开
+            </button>
+            <button
+              id="btnHime"
+              class="ml-2 rounded border border-slate-700 px-2.5 py-1 text-[12px] text-slate-400 hover:border-slate-500"
+              title="粉丝不足 5000 时：用官方直播姬的第三方推流模式，填入其本地地址"
+            >
+              直播姬本地地址
+            </button>
+          </div>
+          <label class="block text-[12px] text-slate-500">RTMP 推流地址</label>
+          <input
+            id="rtmpUrl"
+            class="mt-1 w-full rounded border border-slate-700 bg-[#0d0f13] px-2.5 py-2 text-[12px] text-slate-200 outline-none focus:border-cyan-600"
+            placeholder="粘贴平台给出的推流地址（灰色示例文字，不是已填入的值）"
+            value="rtmp://live-push.bilivideo.com/live-bvc/"
+            spellcheck="false"
+          />
+          <label class="mt-3 block text-[12px] text-slate-500">串流密钥 StreamKey</label>
+          <input
+            id="streamKey"
+            type="password"
+            class="mt-1 w-full rounded border border-slate-700 bg-[#0d0f13] px-2.5 py-2 text-[12px] text-slate-200 outline-none focus:border-cyan-600"
+            placeholder="粘贴串流密钥（含 ?streamname=… 整段）"
+            spellcheck="false"
+          />
+          <p class="mt-2 text-[11px] leading-relaxed text-slate-500">
+            程序不会自动获取任何平台密钥，也不注入脚本、不解析接口。地址已预填常见 CDN 地址，若平台给出不同地址以平台为准。
+            <span class="text-slate-400">顺序：在直播中心点“开始直播” → 再回来重新复制一次密钥（密钥每次开播都会变）→ 粘贴 → 开始推流。没有第三方开播权限（粉丝不足）时，改用官方直播姬的“第三方推流模式”，把它给出的地址/推流码填到这里即可。</span>
+          </p>
+        </section>
+
+        <!-- 采集源 -->
+        <section class="rounded border border-slate-800 bg-[#12151b] p-4">
+          <div class="mb-3 flex items-center justify-between">
+            <h2 class="text-[13px] font-medium text-slate-200">屏幕采集</h2>
+            <button
+              id="btnRefresh"
+              class="rounded border border-slate-700 px-2.5 py-1 text-[12px] text-slate-300 hover:border-slate-500"
+            >
+              刷新列表
+            </button>
+          </div>
+          <label class="flex items-center gap-2 text-[12px] text-slate-300">
+            <input id="autoDegrade" type="checkbox" checked class="h-3.5 w-3.5 accent-cyan-500" />
+            自动降级（DXGI → WGC → GDI，直播中热切换不断流）
+          </label>
+          <div class="mt-3 grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[12px] text-slate-500">显示器</label>
+              <select
+                id="monitorSel"
+                class="mt-1 w-full rounded border border-slate-700 bg-[#0d0f13] px-2 py-1.5 text-[12px] text-slate-200 outline-none focus:border-cyan-600"
+              ></select>
+            </div>
+            <div>
+              <label class="block text-[12px] text-slate-500">采集后端</label>
+              <select
+                id="backendSel"
+                class="mt-1 w-full rounded border border-slate-700 bg-[#0d0f13] px-2 py-1.5 text-[12px] text-slate-200 outline-none focus:border-cyan-600"
+              >
+                <option value="dxgi">DXGI 桌面复制</option>
+                <option value="wgc">WGC 进程捕获</option>
+                <option value="gdi">GDI BitBlt</option>
+              </select>
+            </div>
+          </div>
+          <label class="mt-3 block text-[12px] text-slate-500">窗口（留空 = 整屏）</label>
+          <select
+            id="windowSel"
+            class="mt-1 w-full rounded border border-slate-700 bg-[#0d0f13] px-2 py-1.5 text-[12px] text-slate-200 outline-none focus:border-cyan-600"
+          >
+            <option value="0">整屏（不使用窗口捕获）</option>
+          </select>
+        </section>
+
+        <!-- 视频参数 -->
+        <section class="rounded border border-slate-800 bg-[#12151b] p-4">
+          <h2 class="mb-3 text-[13px] font-medium text-slate-200">视频编码</h2>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[12px] text-slate-500">分辨率</label>
+              <select
+                id="resolution"
+                class="mt-1 w-full rounded border border-slate-700 bg-[#0d0f13] px-2 py-1.5 text-[12px] text-slate-200 outline-none focus:border-cyan-600"
+              >
+                <option value="1280x720">1280 × 720</option>
+                <option value="1920x1080" selected>1920 × 1080</option>
+                <option value="2560x1440">2560 × 1440</option>
+                <option value="3840x2160">3840 × 2160</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[12px] text-slate-500">帧率</label>
+              <select
+                id="fps"
+                class="mt-1 w-full rounded border border-slate-700 bg-[#0d0f13] px-2 py-1.5 text-[12px] text-slate-200 outline-none focus:border-cyan-600"
+              >
+                <option value="30" selected>30 fps</option>
+                <option value="60">60 fps</option>
+                <option value="120">120 fps</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[12px] text-slate-500">码率 (kbps)</label>
+              <input
+                id="bitrate"
+                type="number"
+                value="6000"
+                min="100"
+                step="500"
+                class="mt-1 w-full rounded border border-slate-700 bg-[#0d0f13] px-2 py-1.5 text-[12px] text-slate-200 outline-none focus:border-cyan-600"
+              />
+            </div>
+            <div>
+              <label class="block text-[12px] text-slate-500">关键帧间隔 (秒)</label>
+              <input
+                id="gop"
+                type="number"
+                value="2"
+                min="1"
+                max="10"
+                class="mt-1 w-full rounded border border-slate-700 bg-[#0d0f13] px-2 py-1.5 text-[12px] text-slate-200 outline-none focus:border-cyan-600"
+              />
+            </div>
+            <div class="col-span-2">
+              <label class="block text-[12px] text-slate-500">码率控制</label>
+              <select
+                id="rateControl"
+                class="mt-1 w-full rounded border border-slate-700 bg-[#0d0f13] px-2 py-1.5 text-[12px] text-slate-200 outline-none focus:border-cyan-600"
+              >
+                <option value="cbr">CBR 固定码率</option>
+                <option value="abr" selected>ABR 动态平均码率（推荐）</option>
+                <option value="vbr">VBR 可变码率</option>
+              </select>
+            </div>
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-2 text-[12px] text-slate-300">
+                <input id="nvenc" type="checkbox" checked class="h-3.5 w-3.5 accent-cyan-500" />
+                NVIDIA 硬件编码（NVENC）
+              </label>
+              <span class="text-[11px] text-slate-500">无 N 卡自动回退</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 音频 -->
+        <section class="rounded border border-slate-800 bg-[#12151b] p-4">
+          <h2 class="mb-3 text-[13px] font-medium text-slate-200">音频（48kHz 立体声 AAC）</h2>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-2 text-[12px] text-slate-300">
+                <input id="sysAudio" type="checkbox" checked class="h-3.5 w-3.5 accent-cyan-500" />
+                系统内录（WASAPI Loopback）
+              </label>
+              <input id="sysGain" type="range" min="0" max="200" value="100" class="w-32" />
+            </div>
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-2 text-[12px] text-slate-300">
+                <input id="micAudio" type="checkbox" checked class="h-3.5 w-3.5 accent-cyan-500" />
+                麦克风
+              </label>
+              <input id="micGain" type="range" min="0" max="200" value="100" class="w-32" />
+            </div>
+            <div class="flex items-center justify-between">
+              <label class="text-[12px] text-slate-500">音频码率 (kbps)</label>
+              <select
+                id="audioBitrate"
+                class="rounded border border-slate-700 bg-[#0d0f13] px-2 py-1.5 text-[12px] text-slate-200 outline-none focus:border-cyan-600"
+              >
+                <option value="64">64</option>
+                <option value="128" selected>128</option>
+                <option value="192">192</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- 预览 -->
+        <section class="rounded border border-slate-800 bg-[#12151b] p-4 lg:col-span-2">
+          <div class="mb-3 flex items-center justify-between">
+            <h2 class="text-[13px] font-medium text-slate-200">预览（默认关闭，关闭时零开销）</h2>
+            <label class="flex items-center gap-2 text-[12px] text-slate-300">
+              <input id="previewToggle" type="checkbox" class="h-3.5 w-3.5 accent-cyan-500" />
+              开启预览
+            </label>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[12px] text-slate-500">预览宽度上限</label>
+              <select
+                id="previewWidth"
+                class="mt-1 w-full rounded border border-slate-700 bg-[#0d0f13] px-2 py-1.5 text-[12px] text-slate-200 outline-none focus:border-cyan-600"
+              >
+                <option value="480">480 px</option>
+                <option value="640" selected>640 px</option>
+                <option value="960">960 px</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[12px] text-slate-500">预览帧率上限</label>
+              <select
+                id="previewFps"
+                class="mt-1 w-full rounded border border-slate-700 bg-[#0d0f13] px-2 py-1.5 text-[12px] text-slate-200 outline-none focus:border-cyan-600"
+              >
+                <option value="15">15 fps</option>
+                <option value="30" selected>30 fps</option>
+                <option value="60">60 fps</option>
+              </select>
+            </div>
+          </div>
+          <div id="previewBox" class="mt-3 hidden">
+            <canvas
+              id="previewCanvas"
+              class="w-full rounded border border-slate-800 bg-black"
+              style="aspect-ratio: 16 / 9"
+            ></canvas>
+          </div>
+          <p class="mt-2 text-[11px] text-slate-500">
+            预览直接画在主窗口里（不额外开窗）。关闭后帧复制 / 缩放 / 渲染逻辑全部停止执行，零开销。
+          </p>
+        </section>
+      </div>
+
+      <!-- 运行状态 -->
+      <section class="mt-4 rounded border border-slate-800 bg-[#12151b] p-4">
+        <h2 class="mb-3 text-[13px] font-medium text-slate-200">运行状态</h2>
+        <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-[12px] md:grid-cols-4">
+          <div class="flex justify-between border-b border-slate-800/70 pb-1">
+            <span class="text-slate-500">采集源</span><span id="statSource" class="text-slate-300">—</span>
+          </div>
+          <div class="flex justify-between border-b border-slate-800/70 pb-1">
+            <span class="text-slate-500">编码器</span><span id="statEncoder" class="text-slate-300">—</span>
+          </div>
+          <div class="flex justify-between border-b border-slate-800/70 pb-1">
+            <span class="text-slate-500">采集 / 编码 FPS</span
+            ><span id="statFps" class="text-slate-300">—</span>
+          </div>
+          <div class="flex justify-between border-b border-slate-800/70 pb-1">
+            <span class="text-slate-500">实时码率</span><span id="statKbps" class="text-slate-300">—</span>
+          </div>
+          <div class="flex justify-between border-b border-slate-800/70 pb-1">
+            <span class="text-slate-500">已发帧 / 丢帧</span
+            ><span id="statFrames" class="text-slate-300">—</span>
+          </div>
+          <div class="flex justify-between border-b border-slate-800/70 pb-1">
+            <span class="text-slate-500">热切换次数</span
+            ><span id="statSwitch" class="text-slate-300">—</span>
+          </div>
+          <div class="flex justify-between border-b border-slate-800/70 pb-1">
+            <span class="text-slate-500">推流连接</span><span id="statRtmp" class="text-slate-300">—</span>
+          </div>
+          <div class="flex justify-between border-b border-slate-800/70 pb-1">
+            <span class="text-slate-500">重连次数</span
+            ><span id="statReconnect" class="text-slate-300">—</span>
+          </div>
+          <div class="flex justify-between border-b border-slate-800/70 pb-1">
+            <span class="text-slate-500">音频</span><span id="statAudio" class="text-slate-300">—</span>
+          </div>
+        </div>
+        <h3 class="mt-4 mb-1 text-[12px] text-slate-500">事件日志</h3>
+        <div
+          id="log"
+          class="h-32 overflow-y-auto whitespace-pre-wrap rounded border border-slate-800 bg-[#0d0f13] p-2 text-[11px] leading-relaxed text-slate-400"
+        ></div>
+      </section>
+
+      <p class="mt-4 text-[11px] leading-relaxed text-slate-600">
+        本项目为完全开源、非营利的通用 RTMP 推流工具，与哔哩哔哩（Bilibili）无任何从属、
+        合作或官方关联；不包含任何平台私有接口、不注入脚本、不抓取数据，仅使用公开的 RTMP 协议。
+        所有账号操作与密钥输入均由用户本人完成。MIT License。
+      </p>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

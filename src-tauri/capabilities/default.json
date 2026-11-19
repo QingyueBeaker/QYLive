@@ -1,0 +1,14 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "主窗口、预览窗口与主播后台窗口的基础能力",
+  "windows": ["main", "preview", "livepanel"],
+  "remote": {
+    "urls": [
+      "https://live.bilibili.com/*",
+      "https://passport.bilibili.com/*",
+      "https://www.bilibili.com/*"
+    ]
+  },
+  "permissions": ["core:default", "core:event:default", "core:window:default"]
+}

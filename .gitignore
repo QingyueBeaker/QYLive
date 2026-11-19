@@ -1,0 +1,14 @@
+# 构建产物
+/target
+/dist
+/node_modules
+/src/app.css
+
+# Tauri 生成
+/src-tauri/target
+/src-tauri/gen
+
+# 编辑器
+.vscode/
+.idea/
+*.log
