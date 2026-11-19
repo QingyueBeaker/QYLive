@@ -11,6 +11,7 @@
 ![Rust](https://img.shields.io/badge/Rust-1.75%2B-orange?logo=rust)
 ![Tauri](https://img.shields.io/badge/Tauri-2.x-24C8DB?logo=tauri)
 ![Size](https://img.shields.io/badge/installer-~1.8%20MB-brightgreen)
+![Build](https://github.com/QingyueBeaker/QYLive/actions/workflows/build.yml/badge.svg)
 
 </div>
 
